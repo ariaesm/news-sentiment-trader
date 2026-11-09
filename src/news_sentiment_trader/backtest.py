@@ -127,9 +127,16 @@ def run_backtest(panel: pd.DataFrame, cfg: BacktestConfig | None = None) -> Back
         }
     )
     m_strat = performance(strat, cfg.periods_per_year)
+    # Hit rate = share of (ticker, day) positions whose direction matched the move.
+    active = pd.concat([r[r["position"] != 0] for r in per_ticker.values()])
+    m_strat["hit_rate"] = (
+        float((active["position"] * active["ret"] > 0).mean()) if len(active) else float("nan")
+    )
     m_strat["exposure"] = float(exposure.mean(axis=1).mean())
     m_strat["trades"] = float(trades)
     m_bench = performance(bench, cfg.periods_per_year)
+    all_rets = pd.concat([r["ret"] for r in per_ticker.values()])
+    m_bench["hit_rate"] = float((all_rets[all_rets != 0] > 0).mean())
     m_bench["exposure"] = 1.0
     m_bench["trades"] = float(len(per_ticker))
     metrics = pd.DataFrame({"strategy": m_strat, "buy_hold": m_bench})
