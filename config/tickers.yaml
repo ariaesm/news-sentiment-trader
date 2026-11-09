@@ -1,0 +1,7 @@
+# Keyword -> ticker map used by the entity tagger.
+# Uppercase keywords (<= 6 chars) match case-sensitively as whole words;
+# everything else matches case-insensitively. Cashtags ($AAPL) are matched too.
+tickers:
+  BTC-USD: [bitcoin, BTC, crypto market]
+  AAPL: [Apple, iPhone, AAPL, Tim Cook]
+  MSFT: [Microsoft, Azure, MSFT, Satya Nadella]
