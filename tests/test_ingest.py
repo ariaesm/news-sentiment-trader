@@ -107,3 +107,11 @@ def test_deduplicate_keeps_earliest(sample_items: list[NewsItem]) -> None:
     )
     out = deduplicate([later, *sample_items])
     assert [i.id for i in out] == ["a", "b", "c"]
+
+
+def test_deduplicate_keeps_recurring_titles_outside_window(sample_items: list[NewsItem]) -> None:
+    first = sample_items[0]
+    next_week = NewsItem(
+        id="weekly", timestamp=first.timestamp + timedelta(days=7), source="wire", title=first.title
+    )
+    assert [i.id for i in deduplicate([first, next_week])] == ["a", "weekly"]

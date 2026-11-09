@@ -7,7 +7,7 @@ import json
 import urllib.request
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable, Mapping
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
@@ -162,17 +162,25 @@ def load_news(path_or_url: str | Path) -> list[NewsItem]:
     raise ValueError(f"unsupported news file type: {suffix!r}")
 
 
-def deduplicate(items: Iterable[NewsItem]) -> list[NewsItem]:
-    """Drop items with duplicate ids or identical (source, title), keeping the earliest."""
+def deduplicate(
+    items: Iterable[NewsItem], window: timedelta = timedelta(hours=24)
+) -> list[NewsItem]:
+    """Drop repeated items, keeping the earliest copy.
+
+    An item is a duplicate if its id was already seen, or if the same source
+    published the same title (case-insensitive) less than ``window`` earlier.
+    Recurring headlines (e.g. a daily "what to watch" column) are kept.
+    """
     seen_ids: set[str] = set()
-    seen_titles: set[tuple[str, str]] = set()
+    last_seen: dict[tuple[str, str], datetime] = {}
     out: list[NewsItem] = []
     for item in sorted(items, key=lambda i: i.timestamp):
         key = (item.source.lower(), item.title.lower())
-        if item.id in seen_ids or key in seen_titles:
+        prev = last_seen.get(key)
+        if item.id in seen_ids or (prev is not None and item.timestamp - prev < window):
             continue
         seen_ids.add(item.id)
-        seen_titles.add(key)
+        last_seen[key] = item.timestamp
         out.append(item)
     return out
 

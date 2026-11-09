@@ -41,8 +41,9 @@ def test_no_lookahead_future_signal_does_not_change_past() -> None:
     sent2 = sent.copy()
     sent2[k:] = -sent2[k:] * 10
     alt = run_ticker(_panel(sent2, ret), BacktestConfig(threshold=0.1))
-    pd.testing.assert_frame_equal(base.iloc[: k + 1][["position", "strategy"]],
-                                  alt.iloc[: k + 1][["position", "strategy"]])  # fmt: skip
+    pd.testing.assert_frame_equal(
+        base.iloc[: k + 1][["position", "strategy"]], alt.iloc[: k + 1][["position", "strategy"]]
+    )
     assert not base["position"].iloc[k + 1 :].equals(alt["position"].iloc[k + 1 :])
 
 

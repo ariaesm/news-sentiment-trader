@@ -154,9 +154,16 @@ def event_study(
         pm, plo, phi = _mean_ci(pos[col].to_numpy(dtype=float), confidence)
         nm, nlo, nhi = _mean_ci(neg[col].to_numpy(dtype=float), confidence)
         rows.append(
-            {"day": k, "pos": pm, "pos_lo": plo, "pos_hi": phi, "neg": nm, "neg_lo": nlo,
-             "neg_hi": nhi}
-        )  # fmt: skip
+            {
+                "day": k,
+                "pos": pm,
+                "pos_lo": plo,
+                "pos_hi": phi,
+                "neg": nm,
+                "neg_lo": nlo,
+                "neg_hi": nhi,
+            }
+        )
     table = pd.DataFrame(rows)
     table["spread"] = table["pos"] - table["neg"]
     return EventStudyResult(table, hi, lo, len(pos), len(neg))
